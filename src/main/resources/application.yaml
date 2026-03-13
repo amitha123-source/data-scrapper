@@ -1,3 +1,49 @@
+# Database: set DB_URL, DB_USERNAME, DB_PASSWORD (env or application-local.yaml). Defaults below for local MySQL.
 spring:
   application:
     name: data-scrapper
+  # Avoid RestartClassLoader ClassNotFoundException for ProductDataCsvService when using DevTools
+  devtools:
+    restart:
+      enabled: false
+
+  datasource:
+    # Use standard names and include sensible pool defaults
+    url: ${MYSQL_URL:jdbc:mysql://${MYSQL_HOST:localhost}:3306/${MYSQL_DATABASE:sys}?useSSL=false}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  jpa:
+    hibernate:
+      # 'update' is fine for dev; change to 'validate' for prod
+      ddl-auto: ${HIBERNATE_DDL:update}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+# Gemini AI — API key and model (prompt is in GeminiProductService)
+google:
+  ai:
+    api-key: ${GEMINI_API_KEY:AIzaSyCbk2KiZQ1YSf9CL8z7yvgwpJ5W5znKijw}
+    model: gemini-2.5-flash
+
+# Browse AI - set via environment or override in application-local.yaml
+browse-ai:
+  base-url: https://api.browse.ai/v2
+
+  api-key: ${BROWSE_AI_API_KEY:5131222f-5c7b-4347-800f-54b6eb61e3a0:f3e0b496-1dd3-453d-920a-564f313b2615}
+  robot-ids:
+    product-list: ${BROWSE_AI_ROBOT_1_ID:019c75d4-a8ce-76dd-a201-98735a7fe546}
+    product-detail: ${BROWSE_AI_ROBOT_2_ID:019c6bd3-29d2-7428-80e2-b3c70911d85a}
+    brand-detail: ${BROWSE_AI_ROBOT_3_ID:019c8b2b-f1f4-78a6-af45-f3c87148270a}
+  poll-interval-ms: 10000
+  poll-max-attempts: 120
+
+# Product data CSV file listener
+product-data:
+  watch-directory: "C:\\Users\\amikr\\OneDrive\\Documents\\Product_data"
