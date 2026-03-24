@@ -29,7 +29,7 @@ spring:
 # Gemini AI — API key and model (prompt is in GeminiProductService)
 google:
   ai:
-    api-key: ${GEMINI_API_KEY:AIzaSyCbk2KiZQ1YSf9CL8z7yvgwpJ5W5znKijw}
+    api-key: ${GEMINI_API_KEY:AIzaSyASdjzEbZ_pOuBTOfu_jpW9D5YIKUoXXoc}
     model: gemini-2.5-flash
 
 # Browse AI - set via environment or override in application-local.yaml
@@ -44,6 +44,12 @@ browse-ai:
   poll-interval-ms: 10000
   poll-max-attempts: 120
 
-# Product data CSV file listener
+# Product data CSV file listener and two-file workflow
 product-data:
   watch-directory: "C:\\Users\\amikr\\OneDrive\\Documents\\Product_data"
+  kingpower-file-name: "Kingpower_data.csv"
+  tomford-file-name: "Tomford_data.csv"
+  # Delay (ms) between LLM calls when fetching missing product details; reduces rate-limit / HTTP errors (default 500)
+  llm-fetch-delay-ms: 500
+  # Delete existing brandsite rows per brand before save (true = idempotent re-runs; false = append duplicates)
+  brandsite-replace-by-brand-on-run: true

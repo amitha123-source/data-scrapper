@@ -21,33 +21,21 @@ public class BrandsiteProductExtraction {
     @Column(name = "extract_date")
     private LocalDateTime extractDate;
 
-    @Column(length = 45)
+    @Column(name = "status")
     private String status;
 
-    @Column(name = "task_link", length = 255)
-    private String taskLink;
-
-    @Column(name = "origin_url", length = 255)
-    private String originUrl;
-
-    @Column(name = "what_are_you_looking_for", length = 45)
-    private String whatAreYouLookingFor;
-
-    @Column(length = 45)
+    @Column(name = "brand")
     private String brand;
 
-    @Column(name = "product_name", length = 45)
+    @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "product_details", length = 500)
+    @Column(name = "product_details")
     private String productDetails;
 
-    @Column(length = 45)
+    @Column(name = "price")
     private String price;
 
-    @Column(length = 45)
+    @Column(name = "category")
     private String category;
-
-    @Column(name = "Ingredients", length = 500)
-    private String ingredients;
 }

@@ -1,43 +1,35 @@
 package com.sample.data_scrapper.listener;
 
 import com.sample.data_scrapper.config.ProductDataProperties;
-import com.sample.data_scrapper.dto.ProductDataDto;
-import com.sample.data_scrapper.service.ProductDataCsvService;
 import com.sample.data_scrapper.service.ProductDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.file.*;
-import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 /**
  * Listens for CSV files in the configured product-data directory.
- * On create or modify, parses the CSV and maps rows to {@link ProductDataDto}, then hands off to {@link ProductDataService}.
+ * When Kingpower_data.csv and Tomford_data(2).csv are both present, runs the two-file workflow:
+ * parse both, filter Tomford by Kingpower product names, LLM restructure, save to respective tables.
  */
 @Slf4j
 @Component
 public class ProductDataFileListener implements ApplicationRunner {
 
     private final ProductDataProperties productDataProperties;
-    private final ProductDataCsvService csvService;
     private final ProductDataService productDataService;
 
     @Autowired
     public ProductDataFileListener(
             ProductDataProperties productDataProperties,
-            @Lazy ProductDataCsvService csvService,
             @Lazy ProductDataService productDataService) {
         this.productDataProperties = productDataProperties;
-        this.csvService = csvService;
         this.productDataService = productDataService;
     }
 
@@ -67,31 +59,14 @@ public class ProductDataFileListener implements ApplicationRunner {
     }
 
     /**
-     * Scan the directory for existing CSV files and process them (most recent last so it wins in ProductDataService).
+     * Scan the directory and run the Kingpower + Tomford two-file workflow when both
+     * Kingpower_data.csv and Tomford_data(2).csv are present.
      */
     private void processExistingCsvFiles(Path watchDir) {
-        try (Stream<Path> stream = Files.list(watchDir)) {
-            List<Path> csvFiles = stream
-                    .filter(p -> Files.isRegularFile(p))
-                    .filter(p -> p.getFileName() != null && p.getFileName().toString().toLowerCase().endsWith(".csv"))
-                    .sorted(Comparator.comparingLong(p -> {
-                        try {
-                            return Files.getLastModifiedTime(p).toMillis();
-                        } catch (IOException e) {
-                            return 0L;
-                        }
-                    }))
-                    .toList();
-            if (csvFiles.isEmpty()) {
-                log.info("No existing CSV files found in {}", watchDir);
-            } else {
-                log.info("Processing {} existing CSV file(s) in {}", csvFiles.size(), watchDir);
-                for (Path csvPath : csvFiles) {
-                    processCsvFile(csvPath);
-                }
-            }
-        } catch (IOException e) {
-            log.warn("Could not list directory for initial CSV scan: {}", watchDir, e);
+        try {
+            productDataService.runKingpowerAndTomfordWorkflow();
+        } catch (Exception e) {
+            log.warn("Initial two-file workflow did not run or failed: {}", e.getMessage());
         }
     }
 
@@ -130,7 +105,8 @@ public class ProductDataFileListener implements ApplicationRunner {
                         continue;
                     }
 
-                    processCsvFile(resolved);
+                    // On any CSV create/modify, run the two-file workflow (Kingpower + Tomford)
+                    runTwoFileWorkflow();
                 }
 
                 boolean valid = key.reset();
@@ -146,12 +122,11 @@ public class ProductDataFileListener implements ApplicationRunner {
         }
     }
 
-    private void processCsvFile(Path csvPath) {
+    private void runTwoFileWorkflow() {
         try {
-            List<ProductDataDto> products = csvService.parseCsvFile(csvPath);
-            productDataService.handleParsedData(csvPath, products);
+            productDataService.runKingpowerAndTomfordWorkflow();
         } catch (Exception e) {
-            log.error("Failed to process CSV file: {}", csvPath, e);
+            log.error("Two-file workflow failed", e);
         }
     }
 }

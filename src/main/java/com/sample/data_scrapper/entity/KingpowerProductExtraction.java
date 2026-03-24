@@ -24,10 +24,7 @@ public class KingpowerProductExtraction {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "task_link", length = 255)
-    private String taskLink;
-
-    @Column(name = "origin_url", length = 255)
+    @Column(name = "origin_url")
     private String originUrl;
 
     @Column(name = "brand")

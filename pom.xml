@@ -103,6 +103,11 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
+						<!-- Exclude DevTools from run classpath to avoid RestartClassLoader ClassNotFoundException for ProductDataProperties -->
+						<exclude>
+							<groupId>org.springframework.boot</groupId>
+							<artifactId>spring-boot-devtools</artifactId>
+						</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

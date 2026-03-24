@@ -28,7 +28,7 @@ public class BrowseAiWorkflowService {
 
     private static final String DEFAULT_CATEGORY_URL =
             "https://www.kingpower.com/en/tom-ford-beauty/category/fragrances/private-blend-fragrances";
-    private static final String DEFAULT_TOM_FORD_BEAUTY_FRAGRANCES_LIMIT = "20";
+    private static final String DEFAULT_TOM_FORD_BEAUTY_FRAGRANCES_LIMIT = "10";
 
     private final BrowseAiApiClient apiClient;
     private final BrowseAiProperties properties;
